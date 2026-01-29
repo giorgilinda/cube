@@ -4,7 +4,8 @@ A modern, production-ready Next.js boilerplate with TypeScript, Jest, ESLint, an
 
 ## 🚀 Features
 
-- **Next.js 15** - Latest version with App Router
+- **Next.js 16** - Latest version with App Router
+- **React 19** - Latest React with improved performance
 - **TypeScript** - Type-safe development
 - **Jest** - Unit and integration testing with coverage
 - **ESLint** - Code quality and consistency
@@ -13,25 +14,33 @@ A modern, production-ready Next.js boilerplate with TypeScript, Jest, ESLint, an
 - **Dark Mode Support** - Automatic dark mode via prefers-color-scheme
 - **Mobile-First** - Responsive design out of the box
 - **Production Ready** - Security headers, optimized builds
+- **BaseTemplate Layout** - Pre-built responsive header and footer
+- **Centralized Constants** - App-wide configuration via `constants.ts`
+- **Dynamic Favicon** - Emoji-based favicon support
+- **PWA Ready** - Enhanced metadata for mobile web apps
 
 ## 📁 Project Structure
 
 ```
 src/
 ├── app/              # Next.js App Router pages
-│   ├── layout.tsx   # Root layout
-│   ├── page.tsx     # Home page
-│   └── globals.css  # Global styles
+│   ├── layout.tsx    # Root layout with metadata
+│   ├── page.tsx      # Home page
+│   ├── globals.css   # Global styles
+│   └── templates/    # Page templates
+│       ├── BaseTemplate.tsx        # Main layout with header/footer
+│       └── BaseTemplate.module.css # Template styles
 ├── components/       # Reusable React components
-├── pages/           # API routes (Pages Router)
+├── pages/            # API routes (Pages Router)
 │   └── api/
-├── utils/           # Utility functions
-├── hooks/           # Custom React hooks
-├── contexts/        # React contexts
-├── services/        # External service integrations
-└── styles/          # Global styles and theme
-tests/               # Test files
-public/              # Static assets
+├── utils/            # Utility functions
+│   └── constants.ts  # App-wide constants (name, description, emoji)
+├── hooks/            # Custom React hooks
+├── contexts/         # React contexts
+├── services/         # External service integrations
+└── styles/           # Global styles and theme
+tests/                # Test files
+public/               # Static assets
 ```
 
 ## 🛠️ Getting Started
@@ -83,6 +92,34 @@ The boilerplate includes a comprehensive theme system using CSS variables. Custo
 
 Dark mode is automatically enabled based on system preferences. Customize dark mode styles in the `@media (prefers-color-scheme: dark)` section.
 
+## 🏗️ Templates
+
+The boilerplate includes a `BaseTemplate` layout component that wraps all pages with:
+
+- **Responsive Header** - App name with emoji and navigation links
+- **Main Content Area** - Flexible container for page content
+- **Footer** - Quick links and contact information with social icons
+
+### Customizing the Template
+
+Edit `src/app/templates/BaseTemplate.tsx` to customize the header navigation, footer links, and overall layout structure. The template uses CSS Modules for scoped styling.
+
+## ⚙️ Constants
+
+Centralized application constants are stored in `src/utils/constants.ts`:
+
+```typescript
+export const APP_NAME = "MyApp";
+export const APP_DESCRIPTION = "This is a boilerplate for my apps";
+export const APP_EMOJI = "🆕";
+```
+
+These constants are used throughout the app for:
+
+- Page metadata (title, description)
+- Dynamic emoji favicon
+- Header and footer branding
+
 ## 📝 Example Components
 
 The boilerplate includes a few example components to get you started:
@@ -117,7 +154,12 @@ describe("Button", () => {
 
 ### TypeScript
 
-TypeScript configuration is in `tsconfig.json`. Path aliases are configured with `@/*` pointing to `src/*`.
+TypeScript configuration is in `tsconfig.json`. Key settings include:
+
+- Path aliases: `@/*` pointing to `src/*`
+- `strictNullChecks` enabled for null safety
+- ES2017 target for broad compatibility
+- Node module resolution
 
 ### ESLint
 
@@ -146,7 +188,8 @@ The project can be deployed to any platform that supports Next.js:
 
 ## 📦 What's Included
 
-- ✅ Next.js 15 with App Router
+- ✅ Next.js 16 with App Router
+- ✅ React 19
 - ✅ TypeScript configuration
 - ✅ Jest with React Testing Library
 - ✅ ESLint configuration
@@ -156,6 +199,10 @@ The project can be deployed to any platform that supports Next.js:
 - ✅ Example components and tests
 - ✅ Mobile-first responsive design
 - ✅ Production optimizations
+- ✅ BaseTemplate layout with header/footer
+- ✅ Centralized app constants
+- ✅ Dynamic emoji favicon
+- ✅ PWA-ready metadata (viewport, theme color, Apple Web App)
 
 ## 🔮 Next Steps
 
