@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import BaseLayout from "./templates/BaseTemplate";
 import { APP_NAME, APP_DESCRIPTION, APP_EMOJI } from "@/utils/constants";
+import TanStackProvider from "@/providers/TanStackProvider";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -36,7 +37,9 @@ export default function RootLayout({
         ></link>
       </head>
       <body>
-        <BaseLayout>{children}</BaseLayout>
+        <TanStackProvider>
+          <BaseLayout>{children}</BaseLayout>
+        </TanStackProvider>
       </body>
     </html>
   );

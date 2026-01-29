@@ -7,6 +7,8 @@ A modern, production-ready Next.js boilerplate with TypeScript, Jest, ESLint, an
 - **Next.js 16** - Latest version with App Router
 - **React 19** - Latest React with improved performance
 - **TypeScript** - Type-safe development
+- **TanStack Query** - Server state management with devtools
+- **Zustand** - Lightweight client state management
 - **Jest** - Unit and integration testing with coverage
 - **ESLint** - Code quality and consistency
 - **CSS Modules** - Scoped styling
@@ -31,13 +33,16 @@ src/
 │       ├── BaseTemplate.tsx        # Main layout with header/footer
 │       └── BaseTemplate.module.css # Template styles
 ├── components/       # Reusable React components
-├── pages/            # API routes (Pages Router)
-│   └── api/
-├── utils/            # Utility functions
-│   └── constants.ts  # App-wide constants (name, description, emoji)
 ├── hooks/            # Custom React hooks
 ├── contexts/         # React contexts
-├── services/         # External service integrations
+├── providers/        # React context providers
+│   └── TanStackProvider.tsx  # TanStack Query provider with devtools
+├── services/         # API services using TanStack Query
+│   └── exampleService.ts     # Example "hookified" service
+├── store/            # Zustand state stores
+│   └── useAppStore.ts        # Global app state
+├── utils/            # Utility functions
+│   └── constants.ts  # App-wide constants (name, description, emoji)
 └── styles/           # Global styles and theme
 tests/                # Test files
 public/               # Static assets
@@ -120,6 +125,57 @@ These constants are used throughout the app for:
 - Dynamic emoji favicon
 - Header and footer branding
 
+## 🗃️ State Management
+
+The boilerplate includes two complementary state management solutions:
+
+### TanStack Query (Server State)
+
+TanStack Query handles all server state - data fetching, caching, and synchronization. The app is wrapped with `TanStackProvider` which includes:
+
+- Query caching with 1-minute stale time
+- React Query Devtools (in development)
+
+Create new API services in `src/services/`:
+
+```typescript
+import { useQuery } from "@tanstack/react-query";
+
+export const useGetData = () => {
+  return useQuery({
+    queryKey: ["my-data"],
+    queryFn: async () => {
+      const response = await fetch("/api/data");
+      return response.json();
+    },
+  });
+};
+```
+
+### Zustand (Client State)
+
+Zustand handles client-only state like UI state, user preferences, etc. Create stores in `src/store/`:
+
+```typescript
+import { create } from "zustand";
+
+interface MyState {
+  count: number;
+  increment: () => void;
+}
+
+export const useMyStore = create<MyState>((set) => ({
+  count: 0,
+  increment: () => set((state) => ({ count: state.count + 1 })),
+}));
+```
+
+Use in components:
+
+```typescript
+const { count, increment } = useMyStore();
+```
+
 ## 📝 Example Components
 
 The boilerplate includes a few example components to get you started:
@@ -191,12 +247,15 @@ The project can be deployed to any platform that supports Next.js:
 - ✅ Next.js 16 with App Router
 - ✅ React 19
 - ✅ TypeScript configuration
+- ✅ TanStack Query for data fetching and caching
+- ✅ Zustand for client state management
 - ✅ Jest with React Testing Library
 - ✅ ESLint configuration
 - ✅ CSS Modules with theme system
 - ✅ Dark mode support
 - ✅ Security headers
 - ✅ Example components and tests
+- ✅ Example service pattern for API calls
 - ✅ Mobile-first responsive design
 - ✅ Production optimizations
 - ✅ BaseTemplate layout with header/footer
@@ -206,7 +265,6 @@ The project can be deployed to any platform that supports Next.js:
 
 ## 🔮 Next Steps
 
-- Add state management (Redux, Zustand, etc.)
 - Set up internationalization (i18n)
 - Add Storybook for component development
 - Configure CI/CD pipeline
