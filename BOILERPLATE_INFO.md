@@ -15,19 +15,30 @@ This is a clean, production-ready Next.js boilerplate extracted from a larger pr
 ## ✅ What's Included
 
 ### Core Configuration
-- ✅ Next.js 15 with App Router
+
+- ✅ Next.js 16 with App Router
+- ✅ React 19
 - ✅ TypeScript with strict null checks
 - ✅ Babel for Jest compatibility
 - ✅ ESLint with Next.js config
-- ✅ Path aliases (@/* → src/*)
+- ✅ Path aliases (@/_ → src/_)
+
+### State Management
+
+- ✅ TanStack Query for server state (data fetching, caching)
+- ✅ React Query Devtools for debugging
+- ✅ Zustand for client state management
+- ✅ Example service and store patterns
 
 ### Testing Setup
+
 - ✅ Jest with React Testing Library
 - ✅ Coverage reporting
 - ✅ Example tests for components and utils
 - ✅ Jest setup with testing-library/jest-dom
 
 ### Styling
+
 - ✅ CSS Modules for component styles
 - ✅ Comprehensive theme system with CSS variables
 - ✅ Dark mode support (via prefers-color-scheme)
@@ -35,16 +46,17 @@ This is a clean, production-ready Next.js boilerplate extracted from a larger pr
 - ✅ Utility classes
 
 ### Developer Experience
+
 - ✅ Hot reload in development
 - ✅ TypeScript IntelliSense
 - ✅ ESLint warnings in IDE
 - ✅ Organized folder structure
 
 ### Production Ready
+
 - ✅ Security headers (CSP, XSS protection)
 - ✅ Optimized builds
 - ✅ 404 page
-- ✅ API route example
 
 ## 📁 File Structure
 
@@ -53,11 +65,12 @@ nextjs-boilerplate/
 ├── src/
 │   ├── app/           # Next.js pages (App Router)
 │   ├── components/    # React components
-│   ├── pages/         # API routes
-│   ├── utils/         # Utility functions
 │   ├── hooks/         # Custom hooks (empty, ready to use)
 │   ├── contexts/      # React contexts (empty, ready to use)
-│   ├── services/      # External services (empty, ready to use)
+│   ├── providers/     # React providers (TanStackProvider)
+│   ├── services/      # API services using TanStack Query
+│   ├── store/         # Zustand state stores
+│   ├── utils/         # Utility functions
 │   └── styles/        # Global styles
 ├── tests/             # Test files
 ├── public/            # Static assets
@@ -76,6 +89,7 @@ See README.md and QUICK_START.md for more details.
 ## 🔄 Migration from Original Project
 
 This boilerplate was created from `FamilyMealPlanner2.0` with:
+
 - All project-specific code removed
 - All business logic removed
 - All API integrations removed
@@ -84,12 +98,13 @@ This boilerplate was created from `FamilyMealPlanner2.0` with:
 
 ## 💡 Key Differences from Standard Next.js
 
-1. **Testing setup** - Jest configured and ready
-2. **Theme system** - CSS variables for easy customization
-3. **Component examples** - Shows best practices
-4. **Test examples** - Demonstrates testing patterns
-5. **Security headers** - Production-ready config
-6. **Organized structure** - Clear separation of concerns
+1. **State management** - TanStack Query + Zustand pre-configured
+2. **Testing setup** - Jest configured and ready
+3. **Theme system** - CSS variables for easy customization
+4. **Component examples** - Shows best practices
+5. **Test examples** - Demonstrates testing patterns
+6. **Security headers** - Production-ready config
+7. **Organized structure** - Clear separation of concerns
 
 ## 📝 Next Steps After Cloning
 
@@ -104,7 +119,9 @@ This boilerplate was created from `FamilyMealPlanner2.0` with:
 - **Colors**: `src/styles/theme.css`
 - **Metadata**: `src/app/layout.tsx`
 - **Fonts**: Add to theme.css
-- **API routes**: `src/pages/api/`
+- **API routes**: `src/app/api/[endpoint]/route.ts`
 - **Pages**: `src/app/[page-name]/page.tsx`
+- **API services**: `src/services/`
+- **Client state**: `src/store/`
 
 Happy coding! 🎉

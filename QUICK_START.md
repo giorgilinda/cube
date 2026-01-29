@@ -32,7 +32,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### Project Name
 
 1. Update `package.json`:
-
    - Change `name` to your project name
    - Update `description`
 
@@ -61,9 +60,16 @@ Create new files in `src/app/`:
 
 ### Add API Routes
 
-Create files in `src/pages/api/`:
+Create Route Handlers in `src/app/api/`:
 
-- `src/pages/api/users.ts` → `/api/users`
+- `src/app/api/users/route.ts` → `/api/users`
+
+```typescript
+// src/app/api/users/route.ts
+export async function GET() {
+  return Response.json({ users: [] });
+}
+```
 
 ### Add Components
 
@@ -71,6 +77,44 @@ Create components in `src/components/`:
 
 - `src/components/Header.tsx`
 - `src/components/Header.module.css`
+
+### Add API Services (TanStack Query)
+
+Create services in `src/services/`:
+
+```typescript
+// src/services/userService.ts
+import { useQuery } from "@tanstack/react-query";
+
+export const useGetUsers = () => {
+  return useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const response = await fetch("/api/users");
+      return response.json();
+    },
+  });
+};
+```
+
+### Add Client State (Zustand)
+
+Create stores in `src/store/`:
+
+```typescript
+// src/store/useUserStore.ts
+import { create } from "zustand";
+
+interface UserState {
+  name: string;
+  setName: (name: string) => void;
+}
+
+export const useUserStore = create<UserState>((set) => ({
+  name: "",
+  setName: (name) => set({ name }),
+}));
+```
 
 ## 🧪 Run Tests
 
@@ -100,11 +144,15 @@ npm start
 - Write tests alongside your code
 - Use TypeScript for type safety
 - Follow the existing component patterns
+- Use TanStack Query for all server state (API data)
+- Use Zustand for client-only state (UI state, preferences)
 
 ## 🆘 Need Help?
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [TypeScript Documentation](https://www.typescriptlang.org/docs)
+- [TanStack Query Documentation](https://tanstack.com/query/latest)
+- [Zustand Documentation](https://zustand-demo.pmnd.rs/)
 - [Jest Documentation](https://jestjs.io/docs/getting-started)
 - [React Testing Library](https://testing-library.com/react)
 
