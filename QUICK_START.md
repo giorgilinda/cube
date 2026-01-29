@@ -6,7 +6,7 @@
 
 ```bash
 # Copy the entire boilerplate folder
-cp -r /personal/nextjs-boilerplate /path/to/your/new-project
+cp -r ./nextjs-boilerplate ./my-new-project
 
 # Or clone from GitHub (after you push it)
 git clone <your-github-repo-url> my-new-project
