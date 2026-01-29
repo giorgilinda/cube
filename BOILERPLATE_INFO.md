@@ -86,16 +86,6 @@ nextjs-boilerplate/
 
 See README.md and QUICK_START.md for more details.
 
-## 🔄 Migration from Original Project
-
-This boilerplate was created from `FamilyMealPlanner2.0` with:
-
-- All project-specific code removed
-- All business logic removed
-- All API integrations removed
-- Only the core structure and configuration kept
-- Example components and tests added for guidance
-
 ## 💡 Key Differences from Standard Next.js
 
 1. **State management** - TanStack Query + Zustand pre-configured
@@ -110,14 +100,14 @@ This boilerplate was created from `FamilyMealPlanner2.0` with:
 
 1. Update package.json with your project name
 2. Customize theme.css with your colors
-3. Update metadata in layout.tsx
+3. Update `src/utils/constants.ts` with your app name, description, and emoji
 4. Delete example components/tests if not needed
 5. Add your first feature!
 
 ## 🎨 Customization Points
 
 - **Colors**: `src/styles/theme.css`
-- **Metadata**: `src/app/layout.tsx`
+- **Metadata**: `src/utils/constants.ts`
 - **Fonts**: Add to theme.css
 - **API routes**: `src/app/api/[endpoint]/route.ts`
 - **Pages**: `src/app/[page-name]/page.tsx`

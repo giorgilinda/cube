@@ -6,7 +6,7 @@
 
 ```bash
 # Copy the entire boilerplate folder
-cp -r /home/linda/personal/nextjs-boilerplate /path/to/your/new-project
+cp -r /personal/nextjs-boilerplate /path/to/your/new-project
 
 # Or clone from GitHub (after you push it)
 git clone <your-github-repo-url> my-new-project
@@ -35,9 +35,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
    - Change `name` to your project name
    - Update `description`
 
-2. Update `src/app/layout.tsx`:
-   - Change `title` and `description` in metadata
-   - Update favicon emoji
+2. Update `src/utils/constants.ts`:
+   - Change `APP_NAME` to your app name
+   - Change `APP_DESCRIPTION` to your app description
+   - Change `APP_EMOJI` for the favicon
 
 ### Colors & Theme
 

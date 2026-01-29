@@ -11,7 +11,7 @@
 ### Step 2: Initialize Git and Push
 
 ```bash
-cd /home/linda/personal/nextjs-boilerplate
+cd /personal/nextjs-boilerplate
 
 # Initialize git repository
 git init
