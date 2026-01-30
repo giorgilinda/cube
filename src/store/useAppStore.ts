@@ -21,7 +21,7 @@ interface AppState {
 /**
  * Global App Store using Zustand with Persistence.
  * * PERSISTENCE:
- * This store is wrapped in `persist` middleware, which automatically 
+ * This store is wrapped in `persist` middleware, which automatically
  * syncs the state with `localStorage`.
  * * @example
  * // To access state:
@@ -45,10 +45,10 @@ export const useAppStore = create<AppState>()(
       /** Unique name for the item in localStorage */
       name: "app-storage",
       /** Use localStorage for persistence (Standard Web API) */
-      storage: createJSONStorage(() => localStorage), 
-      /** * OPTIONAL: Specify which fields to save. 
+      storage: createJSONStorage(() => localStorage),
+      /** * OPTIONAL: Specify which fields to save.
        * If omitted, the entire store is persisted.
-       * partialize: (state) => ({ fontSize: state.fontSize }), 
+       * partialize: (state) => ({ fontSize: state.fontSize }),
        */
     }
   )
@@ -64,6 +64,13 @@ export const useAppStore = create<AppState>()(
      const [mounted, setMounted] = useState(false);
      useEffect(() => setMounted(true), []);
      if (!mounted) return null;
+     return <div>{your-zustand-state}px</div>;
+
+     OR use the useIsMounted hook:
+
+     const isMounted = useIsMounted();
+     if (!isMounted) return null;
+     return <div>{your-zustand-state}px</div>;
 
   2. MANUALLY CLEARING STORAGE:
      useAppStore.persist.clearStorage();
