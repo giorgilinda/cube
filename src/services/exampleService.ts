@@ -92,6 +92,7 @@ export const useCreatePost = () => {
     onSettled: () => {
       // Always refetch after error or success to sync with the "truth"
       // NOTE: In case of mock API, you can comment out this line, to see your changes
+      // since onMutation already set it with setQueryData and there is no DB or server logic to update other connected data
       queryClient.invalidateQueries({ queryKey: postKeys.lists() });
     },
   });
@@ -118,6 +119,7 @@ export const useUpdatePost = () => {
       // Update the cache with the updated post
       queryClient.setQueryData(postKeys.detail(data.id), data);
       // NOTE: In case of mock API, you can comment out this line, to see your changes
+      // since onMutation already set it with setQueryData and there is no DB or server logic to update other connected data
       queryClient.invalidateQueries({ queryKey: postKeys.lists() });
     },
   });
@@ -155,6 +157,7 @@ export const useDeletePost = () => {
     onSettled: () => {
       // Always refetch after error or success to sync with the "truth"
       // NOTE: In case of mock API, you can comment out this line, to see your changes
+      // since onMutation already set it with setQueryData and there is no DB or server logic to update other connected data
       queryClient.invalidateQueries({ queryKey: postKeys.lists() });
     },
   });
