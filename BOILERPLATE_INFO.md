@@ -21,14 +21,17 @@ This is a clean, production-ready Next.js boilerplate extracted from a larger pr
 - ✅ TypeScript with strict null checks
 - ✅ Babel for Jest compatibility
 - ✅ ESLint with Next.js config
-- ✅ Path aliases (@/_ → src/_)
+- ✅ Path aliases (@/* → src/*)
 
 ### State Management
 
 - ✅ TanStack Query for server state (data fetching, caching)
 - ✅ React Query Devtools for debugging
+- ✅ Full CRUD service example with optimistic updates
+- ✅ Query key factory pattern for cache management
 - ✅ Zustand for client state management
-- ✅ Example service and store patterns
+- ✅ localStorage persistence middleware
+- ✅ Documented usage examples in code
 
 ### Testing Setup
 
@@ -68,8 +71,8 @@ nextjs-boilerplate/
 │   ├── hooks/         # Custom hooks (empty, ready to use)
 │   ├── contexts/      # React contexts (empty, ready to use)
 │   ├── providers/     # React providers (TanStackProvider)
-│   ├── services/      # API services using TanStack Query
-│   ├── store/         # Zustand state stores
+│   ├── services/      # API services (CRUD example with optimistic updates)
+│   ├── store/         # Zustand stores (with localStorage persistence)
 │   ├── utils/         # Utility functions
 │   └── styles/        # Global styles
 ├── tests/             # Test files
@@ -88,13 +91,23 @@ See README.md and QUICK_START.md for more details.
 
 ## 💡 Key Differences from Standard Next.js
 
-1. **State management** - TanStack Query + Zustand pre-configured
+1. **State management** - TanStack Query (with CRUD/optimistic updates) + Zustand (with persistence)
 2. **Testing setup** - Jest configured and ready
 3. **Theme system** - CSS variables for easy customization
 4. **Component examples** - Shows best practices
 5. **Test examples** - Demonstrates testing patterns
 6. **Security headers** - Production-ready config
 7. **Organized structure** - Clear separation of concerns
+
+## 🔄 Migration from Original Project
+
+This boilerplate was created from `FamilyMealPlanner2.0` with:
+
+- All project-specific code removed
+- All business logic removed
+- All API integrations removed
+- Only the core structure and configuration kept
+- Example components and tests added for guidance
 
 ## 📝 Next Steps After Cloning
 

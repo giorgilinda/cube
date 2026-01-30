@@ -7,8 +7,8 @@ A modern, production-ready Next.js boilerplate with TypeScript, Jest, ESLint, an
 - **Next.js 16** - Latest version with App Router
 - **React 19** - Latest React with improved performance
 - **TypeScript** - Type-safe development
-- **TanStack Query** - Server state management with devtools
-- **Zustand** - Lightweight client state management
+- **TanStack Query** - Server state with CRUD examples and optimistic updates
+- **Zustand** - Client state with localStorage persistence
 - **Jest** - Unit and integration testing with coverage
 - **ESLint** - Code quality and consistency
 - **CSS Modules** - Scoped styling
@@ -38,9 +38,9 @@ src/
 ├── providers/        # React context providers
 │   └── TanStackProvider.tsx  # TanStack Query provider with devtools
 ├── services/         # API services using TanStack Query
-│   └── exampleService.ts     # Example "hookified" service
+│   └── exampleService.ts     # Full CRUD example with optimistic updates
 ├── store/            # Zustand state stores
-│   └── useAppStore.ts        # Global app state
+│   └── useAppStore.ts        # Global app state with persistence
 ├── utils/            # Utility functions
 │   └── constants.ts  # App-wide constants (name, description, emoji)
 └── styles/           # Global styles and theme
@@ -136,44 +136,86 @@ TanStack Query handles all server state - data fetching, caching, and synchroniz
 - Query caching with 1-minute stale time
 - React Query Devtools (in development)
 
-Create new API services in `src/services/`:
+The example service (`src/services/exampleService.ts`) demonstrates a complete CRUD pattern:
 
 ```typescript
-import { useQuery } from "@tanstack/react-query";
+// Query key factory for cache management
+export const postKeys = {
+  all: ["posts"] as const,
+  lists: () => [...postKeys.all, "list"] as const,
+  detail: (id: number) => [...postKeys.all, "detail", id] as const,
+};
 
-export const useGetData = () => {
+// Fetch all posts
+export const useGetPosts = () => {
   return useQuery({
-    queryKey: ["my-data"],
+    queryKey: postKeys.lists(),
     queryFn: async () => {
-      const response = await fetch("/api/data");
-      return response.json();
+      const res = await fetch("/api/posts");
+      return res.json();
+    },
+  });
+};
+
+// Create with optimistic update
+export const useCreatePost = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (newPost) => { /* ... */ },
+    onMutate: async (newPost) => {
+      // Optimistically update cache before server responds
+      await queryClient.cancelQueries({ queryKey: postKeys.lists() });
+      const previous = queryClient.getQueryData(postKeys.lists());
+      queryClient.setQueryData(postKeys.lists(), (old) => [newPost, ...old]);
+      return { previous };
+    },
+    onError: (err, newPost, context) => {
+      // Rollback on error
+      queryClient.setQueryData(postKeys.lists(), context?.previous);
     },
   });
 };
 ```
 
-### Zustand (Client State)
+### Zustand (Client State with Persistence)
 
-Zustand handles client-only state like UI state, user preferences, etc. Create stores in `src/store/`:
+Zustand handles client-only state like UI state, user preferences, etc. The example store (`src/store/useAppStore.ts`) includes **localStorage persistence**:
 
 ```typescript
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
-interface MyState {
-  count: number;
-  increment: () => void;
+interface AppState {
+  isMenuOpen: boolean;
+  fontSize: number;
+  setMenuOpen: (open: boolean) => void;
+  toggleMenu: () => void;
+  setFontSize: (size: number) => void;
 }
 
-export const useMyStore = create<MyState>((set) => ({
-  count: 0,
-  increment: () => set((state) => ({ count: state.count + 1 })),
-}));
+export const useAppStore = create<AppState>()(
+  persist(
+    (set) => ({
+      isMenuOpen: false,
+      fontSize: 16,
+      setMenuOpen: (open) => set({ isMenuOpen: open }),
+      toggleMenu: () => set((state) => ({ isMenuOpen: !state.isMenuOpen })),
+      setFontSize: (size) => set({ fontSize: size }),
+    }),
+    {
+      name: "app-storage", // localStorage key
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);
 ```
 
-Use in components:
+**Note:** For Next.js hydration, check if the component is mounted before using persisted values:
 
 ```typescript
-const { count, increment } = useMyStore();
+const [mounted, setMounted] = useState(false);
+useEffect(() => setMounted(true), []);
+if (!mounted) return null;
 ```
 
 ## 📝 Example Components
@@ -247,15 +289,15 @@ The project can be deployed to any platform that supports Next.js:
 - ✅ Next.js 16 with App Router
 - ✅ React 19
 - ✅ TypeScript configuration
-- ✅ TanStack Query for data fetching and caching
-- ✅ Zustand for client state management
+- ✅ TanStack Query with CRUD patterns and optimistic updates
+- ✅ Zustand with localStorage persistence
 - ✅ Jest with React Testing Library
 - ✅ ESLint configuration
 - ✅ CSS Modules with theme system
 - ✅ Dark mode support
 - ✅ Security headers
 - ✅ Example components and tests
-- ✅ Example service pattern for API calls
+- ✅ Full CRUD service example with query key factory
 - ✅ Mobile-first responsive design
 - ✅ Production optimizations
 - ✅ BaseTemplate layout with header/footer

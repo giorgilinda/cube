@@ -81,40 +81,78 @@ Create components in `src/components/`:
 
 ### Add API Services (TanStack Query)
 
-Create services in `src/services/`:
+The boilerplate includes a full CRUD example in `src/services/exampleService.ts`. Copy this pattern for new services:
 
 ```typescript
 // src/services/userService.ts
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+// Query key factory for cache management
+export const userKeys = {
+  all: ["users"] as const,
+  lists: () => [...userKeys.all, "list"] as const,
+  detail: (id: number) => [...userKeys.all, "detail", id] as const,
+};
+
+// Read
 export const useGetUsers = () => {
   return useQuery({
-    queryKey: ["users"],
+    queryKey: userKeys.lists(),
     queryFn: async () => {
-      const response = await fetch("/api/users");
-      return response.json();
+      const res = await fetch("/api/users");
+      return res.json();
+    },
+  });
+};
+
+// Create with optimistic update
+export const useCreateUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (newUser) => {
+      const res = await fetch("/api/users", {
+        method: "POST",
+        body: JSON.stringify(newUser),
+      });
+      return res.json();
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
     },
   });
 };
 ```
 
-### Add Client State (Zustand)
+### Add Client State (Zustand with Persistence)
 
-Create stores in `src/store/`:
+The boilerplate includes a persisted store example in `src/store/useAppStore.ts`. Copy this pattern:
 
 ```typescript
 // src/store/useUserStore.ts
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 interface UserState {
   name: string;
+  theme: "light" | "dark";
   setName: (name: string) => void;
+  setTheme: (theme: "light" | "dark") => void;
 }
 
-export const useUserStore = create<UserState>((set) => ({
-  name: "",
-  setName: (name) => set({ name }),
-}));
+export const useUserStore = create<UserState>()(
+  persist(
+    (set) => ({
+      name: "",
+      theme: "light",
+      setName: (name) => set({ name }),
+      setTheme: (theme) => set({ theme }),
+    }),
+    {
+      name: "user-storage", // localStorage key
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);
 ```
 
 ## 🧪 Run Tests
