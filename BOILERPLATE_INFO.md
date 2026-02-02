@@ -54,6 +54,7 @@ This is a clean, production-ready Next.js boilerplate extracted from a larger pr
 - ✅ TypeScript IntelliSense
 - ✅ ESLint warnings in IDE
 - ✅ Organized folder structure
+- ✅ Cursor AI workflow with rules and commands
 
 ### Production Ready
 
@@ -77,6 +78,9 @@ nextjs-boilerplate/
 │   └── styles/        # Global styles
 ├── tests/             # Test files
 ├── public/            # Static assets
+├── .cursor/           # Cursor AI configuration
+│   ├── commands/      # Slash command templates
+│   └── rules/         # Auto-applied behavior rules
 └── [config files]     # Package.json, tsconfig, etc.
 ```
 
@@ -98,6 +102,7 @@ See README.md and QUICK_START.md for more details.
 5. **Test examples** - Demonstrates testing patterns
 6. **Security headers** - Production-ready config
 7. **Organized structure** - Clear separation of concerns
+8. **Cursor AI workflow** - Pre-configured rules and commands for AI-assisted development
 
 ## 🔄 Migration from Original Project
 

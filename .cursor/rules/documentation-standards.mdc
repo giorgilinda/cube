@@ -1,0 +1,14 @@
+---
+description: Standards for in-code comments, JSDoc, and README updates
+globs: **/*
+---
+
+# Documentation Standards
+
+- **In-Code**:
+  - Use **TSDoc/JSDoc** for all exported functions and React components.
+  - Explain the **"Why"** for complex logic, not the "What" (the code shows the what).
+- **React Components**: Document props using TypeScript interfaces. If a prop is complex, add a comment explaining its impact.
+- **Liquid**: Add `{% comment %}` blocks for complex logic sections in `.liquid` files.
+- **README**: If a new feature requires a new environment variable or a new `npm` command, update the `README.md` immediately.
+- **Automated Update**: After a major change, the agent should suggest updating any relevant `ARCHITECTURE.md` or `docs/` files.

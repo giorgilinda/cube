@@ -1,0 +1,10 @@
+---
+description: Rules for Liquid templating and logic
+globs: **/*.liquid
+---
+# Liquid Templating Rules
+
+- **Syntax**: Ensure all `{% ... %}` and `{{ ... }}` tags are properly closed.
+- **Performance**: Avoid deep nested loops within Liquid. Prefer using `assign` to capture complex logic results early.
+- **Integration**: When Liquid is used inside `<script>` tags, ensure you handle potential syntax conflicts (e.g., using `| json` filter for safe variable passing).
+- **Commenting**: Use `{% comment %}` for complex logic blocks to explain "Why" rather than "What."

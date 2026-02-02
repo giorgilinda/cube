@@ -1,0 +1,14 @@
+---
+description: Enforces Linting and Prettier standards before task completion
+globs: **/*
+---
+# Quality Control (Lint & Prettier)
+
+- **Pre-Completion Check**: Before marking a task as "Done," the agent MUST check for existing `.eslintrc` or `.prettierrc` files.
+- **Execution**:
+  - If a `lint` or `format` script exists in `package.json`, the agent should attempt to run it autonomously (`npm run lint` or `npm run format`).
+  - **Self-Correction**: If the agent introduces a linting error, it must fix it before reporting success.
+- **Style**:
+  - No trailing commas (unless specified in config).
+  - Single quotes for strings in TS/JS.
+  - 2-space indentation unless the project uses 4.

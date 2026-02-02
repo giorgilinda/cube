@@ -20,6 +20,7 @@ A modern, production-ready Next.js boilerplate with TypeScript, Jest, ESLint, an
 - **Centralized Constants** - App-wide configuration via `constants.ts`
 - **Dynamic Favicon** - Emoji-based favicon support
 - **PWA Ready** - Enhanced metadata for mobile web apps
+- **Cursor AI Workflow** - Pre-configured rules and commands for AI-assisted development
 
 ## 📁 Project Structure
 
@@ -44,6 +45,9 @@ src/
 ├── utils/            # Utility functions
 │   └── constants.ts  # App-wide constants (name, description, emoji)
 └── styles/           # Global styles and theme
+.cursor/              # Cursor AI workflow configuration
+├── commands/         # Slash command templates (/request, /refresh, /retro)
+└── rules/            # Auto-applied behavior rules for the AI agent
 tests/                # Test files
 public/               # Static assets
 ```
@@ -304,6 +308,23 @@ The project can be deployed to any platform that supports Next.js:
 - ✅ Centralized app constants
 - ✅ Dynamic emoji favicon
 - ✅ PWA-ready metadata (viewport, theme color, Apple Web App)
+
+## 🤖 Cursor AI Workflow
+
+This boilerplate includes a pre-configured Cursor AI workflow for efficient AI-assisted development. See `CURSOR.md` for full details.
+
+### Quick Start
+
+1. **Start a task:** Use `/request` followed by your feature or fix description
+2. **Debug persistent issues:** Use `/refresh` to trigger deep root-cause analysis
+3. **Improve over time:** Use `/retro` to reflect on the session and update project rules
+
+### Structure
+
+- `.cursor/rules/` - Behavioral rules automatically applied to the AI agent
+- `.cursor/commands/` - Slash command templates for structured workflows
+
+The AI agent follows a research-first protocol, prioritizes code over documentation as source of truth, and performs self-audits before reporting completion.
 
 ## 🔮 Next Steps
 
