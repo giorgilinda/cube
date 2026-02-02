@@ -1,0 +1,33 @@
+---
+description: Standards for TypeScript and JavaScript logic, focusing on safety and readability
+globs: **/*.{ts,js,tsx,jsx}
+---
+
+# TypeScript/JavaScript Logic Standards
+
+- **Function Guards**: Prioritize "Early Returns" and "Guard Clauses" to reduce nesting.
+
+  - ✅ **Good**:
+    ```typescript
+    function processUser(user: User | null) {
+      if (!user) return; // Guard
+      if (!user.isActive) throw new Error("Inactive"); // Guard
+      // ... actual logic here
+    }
+    ```
+  - ❌ **Bad**: `if (user) { if (user.isActive) { ... } }`
+
+- **Best Practices**:
+
+  - **Immutability**: Use `const` by default. Use `map`, `filter`, and `reduce` instead of `for` loops where performance allows.
+  - **Naming**: Use intention-revealing names. Boolean variables should start with `is`, `has`, or `should`.
+  - **Null Safety**: Use Optional Chaining (`?.`) and Nullish Coalescing (`??`) instead of truthy checks for values that could be `0` or `""`.
+
+- **Async Code**:
+
+  - Always use `async/await` over raw `.then()`.
+  - Wrap top-level async calls in `try/catch` blocks or provide a global error handler.
+
+- **Type Safety**:
+  - Use Type Guards (`is` keyword) for complex type narrowing.
+  - Avoid type assertions (`as Type`) unless interfacing with external, untyped libraries.
