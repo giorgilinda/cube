@@ -1,0 +1,29 @@
+---
+description: Global precedence rule: Documentation and local repo patterns override general AI rules.
+globs: **/*
+priority: high
+---
+
+# Rule Precedence & Local Conventions
+
+## 1. The Source of Truth Hierarchy
+
+When rules conflict, follow this order of priority:
+
+1. **Existing Documentation**: Any `.md` files in the project (e.g., `README.md`, `CONVENTIONS.md`, `ARCHITECTURE.md`).
+2. **Local Code Patterns**: The established style in the files currently being edited or neighboring files.
+3. **Project Rules**: Other `.mdc` files in `.cursor/rules/`.
+4. **General AI Knowledge**: Global best practices.
+
+## 2. Documentation Discovery Protocol
+
+Before starting any task, the agent MUST:
+
+- **Scan for MD files**: Look for any `.md` files in the root or `docs/` folder that mention "Style," "Convention," "Architecture," or "Standard."
+- **Honor Explicit Instructions**: If a `.md` file says "Use `function` instead of arrow functions," that instruction **overrides** the `typescript-logic.mdc` rule.
+- **Reference**: When making a decision based on a markdown file, briefly mention it (e.g., _"Following the pattern in CONVENTIONS.md..."_).
+
+## 3. Consistency Over Refactoring
+
+- Do not refactor existing code to match `.mdc` rules unless specifically requested.
+- If you find a conflict between a `.md` file and a `.mdc` rule, **ask for clarification** or default to the `.md` file.
