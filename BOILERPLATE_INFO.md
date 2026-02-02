@@ -68,14 +68,13 @@ This is a clean, production-ready Next.js boilerplate extracted from a larger pr
 nextjs-boilerplate/
 ├── src/
 │   ├── app/           # Next.js pages (App Router)
-│   ├── components/    # React components
-│   ├── hooks/         # Custom hooks (empty, ready to use)
-│   ├── contexts/      # React contexts (empty, ready to use)
+│   ├── components/    # React components (Button, Card)
+│   ├── hooks/         # Custom hooks (useIsMounted for hydration)
 │   ├── providers/     # React providers (TanStackProvider)
 │   ├── services/      # API services (CRUD example with optimistic updates)
 │   ├── store/         # Zustand stores (with localStorage persistence)
-│   ├── utils/         # Utility functions
-│   └── styles/        # Global styles
+│   ├── utils/         # Utility functions (formatDate, capitalize, debounce)
+│   └── styles/        # Global styles and theme variables
 ├── tests/             # Test files
 ├── public/            # Static assets
 ├── .cursor/           # Cursor AI configuration

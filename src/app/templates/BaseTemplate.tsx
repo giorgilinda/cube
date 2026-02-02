@@ -4,6 +4,16 @@ import React from "react";
 import styles from "./BaseTemplate.module.css";
 import { APP_NAME, APP_EMOJI } from "@/utils/constants";
 
+/**
+ * Base layout template that wraps all pages.
+ *
+ * Provides a consistent structure with:
+ * - Responsive header with app branding and navigation
+ * - Main content area
+ * - Footer with quick links and contact information
+ *
+ * Customize navigation links and contact info directly in this component.
+ */
 const BaseTemplate = (props: { children: React.ReactNode }) => {
   return (
     <div className={styles.wrapper}>

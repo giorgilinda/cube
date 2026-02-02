@@ -22,11 +22,15 @@ Since Cursor's custom **Slash Commands** are currently stored in your local appl
 2. Go to **General** > **Rules for AI**.
 3. In the **Commands** section, click **+ New** for each of these:
 
-| Command    | Label             | Content Source               | Purpose                                             |
-| ---------- | ----------------- | ---------------------------- | --------------------------------------------------- |
-| `/request` | **Mission Start** | `.cursor/commands/request.md` | Start a new feature or fix with full context.       |
-| `/refresh` | **Root Cause**    | `.cursor/commands/refresh.md` | Use when the agent is stuck or a bug is persistent. |
-| `/retro`   | **Self-Improve**  | `.cursor/commands/retro.md`   | Reflect on the session and update project rules.    |
+| Command    | Label             | Content Source                     | Purpose                                             |
+| ---------- | ----------------- | ---------------------------------- | --------------------------------------------------- |
+| `/request` | **Mission Start** | `.cursor/commands/request.md`      | Start a new feature or fix with full context.       |
+| `/refresh` | **Root Cause**    | `.cursor/commands/refresh.md`      | Use when the agent is stuck or a bug is persistent. |
+| `/retro`   | **Self-Improve**  | `.cursor/commands/retro.md`        | Reflect on the session and update project rules.    |
+| `/docs`    | **Sync Docs**     | `.cursor/commands/docs.md`         | Audit and synchronize documentation with code.      |
+| `/review`  | **Code Review**   | `.cursor/commands/review.md`       | Perform code review before committing.              |
+| `/test`    | **Run Tests**     | `.cursor/commands/test.md`         | Execute and verify test coverage.                   |
+| `/commit`  | **Commit**        | `.cursor/commands/commit.md`       | Create structured commit messages.                  |
 
 ---
 

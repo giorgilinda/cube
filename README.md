@@ -29,13 +29,14 @@ src/
 ├── app/              # Next.js App Router pages
 │   ├── layout.tsx    # Root layout with metadata
 │   ├── page.tsx      # Home page
+│   ├── not-found.tsx # Custom 404 page
 │   ├── globals.css   # Global styles
 │   └── templates/    # Page templates
 │       ├── BaseTemplate.tsx        # Main layout with header/footer
 │       └── BaseTemplate.module.css # Template styles
 ├── components/       # Reusable React components
 ├── hooks/            # Custom React hooks
-├── contexts/         # React contexts
+│   └── useIsMounted.ts  # Hydration-safe mounting hook
 ├── providers/        # React context providers
 │   └── TanStackProvider.tsx  # TanStack Query provider with devtools
 ├── services/         # API services using TanStack Query
@@ -43,10 +44,12 @@ src/
 ├── store/            # Zustand state stores
 │   └── useAppStore.ts        # Global app state with persistence
 ├── utils/            # Utility functions
-│   └── constants.ts  # App-wide constants (name, description, emoji)
+│   ├── constants.ts  # App-wide constants (name, description, emoji)
+│   └── index.ts      # Common utilities (formatDate, capitalize, debounce)
 └── styles/           # Global styles and theme
+    └── theme.css     # CSS variables for theming
 .cursor/              # Cursor AI workflow configuration
-├── commands/         # Slash command templates (/request, /refresh, /retro)
+├── commands/         # Slash command templates
 └── rules/            # Auto-applied behavior rules for the AI agent
 tests/                # Test files
 public/               # Static assets
@@ -214,12 +217,18 @@ export const useAppStore = create<AppState>()(
 );
 ```
 
-**Note:** For Next.js hydration, check if the component is mounted before using persisted values:
+**Note:** For Next.js hydration, check if the component is mounted before using persisted values. Use the included `useIsMounted` hook:
 
 ```typescript
-const [mounted, setMounted] = useState(false);
-useEffect(() => setMounted(true), []);
-if (!mounted) return null;
+import { useIsMounted } from "@/hooks/useIsMounted";
+
+const MyComponent = () => {
+  const isMounted = useIsMounted();
+  const fontSize = useAppStore((s) => s.fontSize);
+
+  if (!isMounted) return null;
+  return <div style={{ fontSize }}>Content</div>;
+};
 ```
 
 ## 📝 Example Components
@@ -318,6 +327,10 @@ This boilerplate includes a pre-configured Cursor AI workflow for efficient AI-a
 1. **Start a task:** Use `/request` followed by your feature or fix description
 2. **Debug persistent issues:** Use `/refresh` to trigger deep root-cause analysis
 3. **Improve over time:** Use `/retro` to reflect on the session and update project rules
+4. **Sync docs:** Use `/docs` to audit and update documentation
+5. **Review code:** Use `/review` for code review before commits
+6. **Run tests:** Use `/test` to run and verify test coverage
+7. **Commit changes:** Use `/commit` for structured commit messages
 
 ### Structure
 
