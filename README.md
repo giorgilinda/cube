@@ -143,46 +143,29 @@ TanStack Query handles all server state - data fetching, caching, and synchroniz
 - Query caching with 1-minute stale time
 - React Query Devtools (in development)
 
-The example service (`src/services/exampleService.ts`) demonstrates a complete CRUD pattern using [JSONPlaceholder](https://jsonplaceholder.typicode.com/) as the API. Use the same pattern with your own API routes (e.g. `/api/posts`).
+The example service (`src/services/exampleService.ts`) exports a **generic `createCrudService<T>()` factory** plus a concrete Post example using [JSONPlaceholder](https://jsonplaceholder.typicode.com/). Create services for any entity by calling the factory:
 
 ```typescript
-// Query key factory for cache management (matches exampleService.ts)
-export const postKeys = {
-  all: ["posts"] as const,
-  lists: () => [...postKeys.all, "list"] as const,
-  details: () => [...postKeys.all, "detail"] as const,
-  detail: (id: number) => [...postKeys.details(), id] as const,
-};
+import { createCrudService, type CrudEntity } from "@/services/exampleService";
 
-// Fetch all posts (example uses JSONPlaceholder; replace URL with your API)
-export const useGetPosts = () => {
-  return useQuery({
-    queryKey: postKeys.lists(),
-    queryFn: async () => {
-      const res = await fetch("https://jsonplaceholder.typicode.com/posts");
-      if (!res.ok) throw new Error("Failed to fetch posts");
-      return res.json();
-    },
-  });
-};
+interface User extends CrudEntity {
+  name: string;
+  email: string;
+}
 
-// Create with optimistic update
-export const useCreatePost = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (newPost) => { /* POST to your API */ },
-    onMutate: async (newPost) => {
-      await queryClient.cancelQueries({ queryKey: postKeys.lists() });
-      const previous = queryClient.getQueryData(postKeys.lists());
-      queryClient.setQueryData(postKeys.lists(), (old) => [newPost, ...old]);
-      return { previous };
-    },
-    onError: (_err, _newPost, context) => {
-      queryClient.setQueryData(postKeys.lists(), context?.previous);
-    },
-  });
-};
+const userService = createCrudService<User>({
+  entityKey: "users",
+  baseUrl: "/api/users",  // or your API base URL
+});
+
+// Use the generated hooks
+const { useGetList, useGetItem, useCreate, useUpdate, useDelete } = userService;
+const { data: users } = useGetList();
+const { mutate: createUser } = useCreate();
+createUser({ name: "Jane", email: "jane@example.com" });  // id omitted
 ```
+
+The Post example (useGetPosts, useCreatePost, etc.) is built the same way and shows the full CRUD pattern with optimistic updates.
 
 ### Zustand (Client State with Persistence)
 

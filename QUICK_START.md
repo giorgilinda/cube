@@ -81,46 +81,24 @@ Create components in `src/components/`:
 
 ### Add API Services (TanStack Query)
 
-The boilerplate includes a full CRUD example in `src/services/exampleService.ts`. Copy this pattern for new services:
+Use the generic `createCrudService` from `src/services/exampleService.ts` for new entities:
 
 ```typescript
 // src/services/userService.ts
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { createCrudService, type CrudEntity } from "@/services/exampleService";
 
-// Query key factory for cache management
-export const userKeys = {
-  all: ["users"] as const,
-  lists: () => [...userKeys.all, "list"] as const,
-  detail: (id: number) => [...userKeys.all, "detail", id] as const,
-};
+interface User extends CrudEntity {
+  name: string;
+  email: string;
+}
 
-// Read
-export const useGetUsers = () => {
-  return useQuery({
-    queryKey: userKeys.lists(),
-    queryFn: async () => {
-      const res = await fetch("/api/users");
-      return res.json();
-    },
-  });
-};
+const userService = createCrudService<User>({
+  entityKey: "users",
+  baseUrl: "/api/users",
+});
 
-// Create with optimistic update
-export const useCreateUser = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (newUser) => {
-      const res = await fetch("/api/users", {
-        method: "POST",
-        body: JSON.stringify(newUser),
-      });
-      return res.json();
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
-    },
-  });
-};
+export const { useGetList, useGetItem, useCreate, useUpdate, useDelete } = userService;
+// Or alias: export const useGetUsers = userService.useGetList;
 ```
 
 ### Add Client State (Zustand with Persistence)
