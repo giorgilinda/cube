@@ -36,6 +36,7 @@ Since Cursor's custom **Slash Commands** are currently stored in your local appl
 | `/upgrade` | **Modernize**     | `.cursor/commands/upgrade.md`       | Audit for legacy patterns and propose modernization.           |
 | `/concise` | **Conciseness**   | `.cursor/commands/concise.md`        | Enforce radical conciseness in AI responses.                  |
 | `/no-absolute-right` | **Tone**  | `.cursor/commands/no-absolute-right.md` | Avoid sycophantic language; brief acknowledgments only.   |
+| `/explain` | **Walkthrough**   | `.cursor/prompts/explain.md`        | Get a detailed, line-by-line mentorship-style explanation of any code. |
 
 ---
 
