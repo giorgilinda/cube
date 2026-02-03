@@ -23,9 +23,13 @@ export function capitalize(str: string): string {
 }
 
 /**
- * Debounce a function
+ * Returns a debounced version of the given function that delays invocation until `wait` ms after the last call.
+ *
+ * @param func - Function to debounce
+ * @param wait - Delay in milliseconds
+ * @returns Debounced function with the same parameter types as `func`
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {

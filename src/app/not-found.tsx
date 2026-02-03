@@ -1,6 +1,9 @@
 import React from "react";
 import styles from "./not-found.module.css";
 
+/**
+ * Custom 404 page shown when a route does not match. Provides a link back to home.
+ */
 export default function NotFound() {
   return (
     <div className={styles.container}>

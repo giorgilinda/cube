@@ -12,10 +12,10 @@ import { useState, useEffect } from "react";
  * ```tsx
  * const MyComponent = () => {
  *   const isMounted = useIsMounted();
- *   const theme = useAppStore((s) => s.theme);
+ *   const fontSize = useAppStore((s) => s.fontSize);
  *
  *   if (!isMounted) return null; // or a loading skeleton
- *   return <div className={theme}>Content</div>;
+ *   return <div style={{ fontSize }}>Content</div>;
  * };
  * ```
  */

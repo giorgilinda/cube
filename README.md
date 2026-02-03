@@ -143,22 +143,24 @@ TanStack Query handles all server state - data fetching, caching, and synchroniz
 - Query caching with 1-minute stale time
 - React Query Devtools (in development)
 
-The example service (`src/services/exampleService.ts`) demonstrates a complete CRUD pattern:
+The example service (`src/services/exampleService.ts`) demonstrates a complete CRUD pattern using [JSONPlaceholder](https://jsonplaceholder.typicode.com/) as the API. Use the same pattern with your own API routes (e.g. `/api/posts`).
 
 ```typescript
-// Query key factory for cache management
+// Query key factory for cache management (matches exampleService.ts)
 export const postKeys = {
   all: ["posts"] as const,
   lists: () => [...postKeys.all, "list"] as const,
-  detail: (id: number) => [...postKeys.all, "detail", id] as const,
+  details: () => [...postKeys.all, "detail"] as const,
+  detail: (id: number) => [...postKeys.details(), id] as const,
 };
 
-// Fetch all posts
+// Fetch all posts (example uses JSONPlaceholder; replace URL with your API)
 export const useGetPosts = () => {
   return useQuery({
     queryKey: postKeys.lists(),
     queryFn: async () => {
-      const res = await fetch("/api/posts");
+      const res = await fetch("https://jsonplaceholder.typicode.com/posts");
+      if (!res.ok) throw new Error("Failed to fetch posts");
       return res.json();
     },
   });
@@ -168,16 +170,14 @@ export const useGetPosts = () => {
 export const useCreatePost = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (newPost) => { /* ... */ },
+    mutationFn: async (newPost) => { /* POST to your API */ },
     onMutate: async (newPost) => {
-      // Optimistically update cache before server responds
       await queryClient.cancelQueries({ queryKey: postKeys.lists() });
       const previous = queryClient.getQueryData(postKeys.lists());
       queryClient.setQueryData(postKeys.lists(), (old) => [newPost, ...old]);
       return { previous };
     },
-    onError: (err, newPost, context) => {
-      // Rollback on error
+    onError: (_err, _newPost, context) => {
       queryClient.setQueryData(postKeys.lists(), context?.previous);
     },
   });
@@ -324,13 +324,18 @@ This boilerplate includes a pre-configured Cursor AI workflow for efficient AI-a
 
 ### Quick Start
 
-1. **Start a task:** Use `/request` followed by your feature or fix description
-2. **Debug persistent issues:** Use `/refresh` to trigger deep root-cause analysis
-3. **Improve over time:** Use `/retro` to reflect on the session and update project rules
-4. **Sync docs:** Use `/docs` to audit and update documentation
-5. **Review code:** Use `/review` for code review before commits
-6. **Run tests:** Use `/test` to run and verify test coverage
-7. **Commit changes:** Use `/commit` for structured commit messages
+1. **Start a task:** `/request` followed by your feature or fix description
+2. **Debug persistent issues:** `/refresh` for deep root-cause analysis
+3. **Improve over time:** `/retro` to reflect and update project rules
+4. **Sync docs:** `/docs` to audit and synchronize documentation with code
+5. **Review code:** `/review` for code review before commits
+6. **Run tests:** `/test` to run and verify test coverage
+7. **Commit changes:** `/commit` for structured commit messages
+8. **Security audit:** `/secure` for OWASP-focused vulnerability and threat modeling
+9. **Brainstorm (no code):** `/spark` for Socratic exploration and architectural options
+10. **Modernize code:** `/upgrade` to audit legacy patterns and propose upgrades
+
+See `CURSOR.md` for the full command table and rules reference.
 
 ### Structure
 

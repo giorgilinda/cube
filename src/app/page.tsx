@@ -1,6 +1,9 @@
 import React from "react";
 import styles from "./page.module.css";
 
+/**
+ * Home page. Renders the default Next.js welcome content with documentation links.
+ */
 export default function Home() {
   return (
     <div className={styles.container}>

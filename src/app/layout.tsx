@@ -23,6 +23,10 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Root layout for the Next.js App Router.
+ * Renders HTML shell, viewport/metadata, dynamic emoji favicon, TanStack Query provider, and BaseTemplate around all pages.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
