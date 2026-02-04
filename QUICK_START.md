@@ -81,11 +81,11 @@ Create components in `src/components/`:
 
 ### Add API Services (TanStack Query)
 
-Use the generic `createCrudService` from `src/services/exampleService.ts` for new entities:
+Use the generic `createCrudService` from `src/services/CRUDService.ts` for new entities:
 
 ```typescript
 // src/services/userService.ts
-import { createCrudService, type CrudEntity } from "@/services/exampleService";
+import { createCrudService, type CrudEntity } from "@/services/CRUDService";
 
 interface User extends CrudEntity {
   name: string;

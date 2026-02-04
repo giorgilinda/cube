@@ -5,7 +5,10 @@
  */
 
 /**
- * Format a date to a readable string
+cd  * Format a date to a readable string (e.g. "January 1, 2025").
+ *
+ * @param date - Date to format
+ * @returns Formatted string in en-US long date style
  */
 export function formatDate(date: Date): string {
   return new Intl.DateTimeFormat("en-US", {
@@ -16,7 +19,10 @@ export function formatDate(date: Date): string {
 }
 
 /**
- * Capitalize the first letter of a string
+ * Capitalize the first letter of a string.
+ *
+ * @param str - Input string
+ * @returns String with first character uppercased
  */
 export function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);

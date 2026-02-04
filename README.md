@@ -40,7 +40,7 @@ src/
 ├── providers/        # React context providers
 │   └── TanStackProvider.tsx  # TanStack Query provider with devtools
 ├── services/         # API services using TanStack Query
-│   └── exampleService.ts     # Full CRUD example with optimistic updates
+│   └── CRUDService.ts        # Generic CRUD factory with optimistic updates
 ├── store/            # Zustand state stores
 │   └── useAppStore.ts        # Global app state with persistence
 ├── utils/            # Utility functions
@@ -143,10 +143,10 @@ TanStack Query handles all server state - data fetching, caching, and synchroniz
 - Query caching with 1-minute stale time
 - React Query Devtools (in development)
 
-The example service (`src/services/exampleService.ts`) exports a **generic `createCrudService<T>()` factory** plus a concrete Post example using [JSONPlaceholder](https://jsonplaceholder.typicode.com/). Create services for any entity by calling the factory:
+The CRUD service (`src/services/CRUDService.ts`) exports a **generic `createCrudService<T>()` factory**. Create services for any entity by calling the factory. List responses can be plain arrays, unwrapped via `listFromResponse`, or list-plus-metadata via `parseListResponse` (see JSDoc in CRUDService.ts).
 
 ```typescript
-import { createCrudService, type CrudEntity } from "@/services/exampleService";
+import { createCrudService, type CrudEntity } from "@/services/CRUDService";
 
 interface User extends CrudEntity {
   name: string;
@@ -165,7 +165,7 @@ const { mutate: createUser } = useCreate();
 createUser({ name: "Jane", email: "jane@example.com" });  // id omitted
 ```
 
-The Post example (useGetPosts, useCreatePost, etc.) is built the same way and shows the full CRUD pattern with optimistic updates.
+All hooks support optimistic updates for create and delete. See in-code examples in `CRUDService.ts` for list-only, `listFromResponse`, and list-plus-metadata patterns.
 
 ### Zustand (Client State with Persistence)
 
@@ -293,7 +293,7 @@ The project can be deployed to any platform that supports Next.js:
 - ✅ Dark mode support
 - ✅ Security headers
 - ✅ Example components and tests
-- ✅ Full CRUD service example with query key factory
+- ✅ Generic CRUD service (CRUDService.ts) with query key factory and list/metadata options
 - ✅ Mobile-first responsive design
 - ✅ Production optimizations
 - ✅ BaseTemplate layout with header/footer

@@ -15,7 +15,7 @@ Project-level conventions reflected in the codebase. When in doubt, follow exist
 
 ## State
 
-- **Server state**: TanStack Query in `src/services/`. Use `createCrudService<T>()` from `exampleService.ts` for new entities; it provides a query key factory and hooks with optimistic updates for create/delete.
+- **Server state**: TanStack Query in `src/services/`. Use `createCrudService<T>()` from `CRUDService.ts` for new entities; it provides a query key factory and hooks with optimistic updates for create/delete. List responses: raw array, `listFromResponse` (unwrap to T[]), or `parseListResponse` (list + metadata); see CRUDService.ts JSDoc.
 - **Client state**: Zustand in `src/store/`. Use `persist` + `createJSONStorage(() => localStorage)` when persistence is needed. For Next.js, read persisted state only after mount (e.g. `useIsMounted`).
 
 ## Styling

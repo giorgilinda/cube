@@ -7,14 +7,38 @@ export interface CrudEntity {
   id: number;
 }
 
+/**
+ * Generic list response: list plus any extra fields from the API.
+ * Use with parseListResponse when the API returns list + metadata (pagination, links, etc.).
+ * Mutations only update the `list` property and preserve all other fields.
+ */
+export type ListResponse<T, M = Record<string, never>> = { list: T[] } & M;
+
+/**
+ * Convenience type for APIs that return { list, info }.
+ * Same as ListResponse<T, { info: I }>.
+ */
+export type ListWithInfo<T, I> = ListResponse<T, { info: I }>;
+
 /** Configuration for creating a CRUD service. */
-export interface CrudServiceConfig<T extends CrudEntity> {
+export interface CrudServiceConfig<T extends CrudEntity, ListMeta = undefined> {
   /** Query key segment (e.g. "posts", "users"). Used for cache keys. */
   entityKey: string;
   /** Base API URL (e.g. "https://api.example.com/posts" or "/api/posts"). */
   baseUrl: string;
   /** Optional: custom error message when fetch fails. */
   notFoundMessage?: string;
+  /**
+   * Optional: return only the list when the API wraps it (e.g. { results: T[] }).
+   * Hook returns T[]; simplest when you don't need other response fields.
+   */
+  listFromResponse?: (body: unknown) => T[];
+  /**
+   * Optional: return list + any metadata. Your parser returns { list: T[], ...meta }.
+   * Hook returns that object; mutations preserve meta and only update list.
+   * Use createCrudService<T, ListMeta> to type the extra fields.
+   */
+  parseListResponse?: (body: unknown) => ListResponse<T, ListMeta>;
 }
 
 /** Query key factory returned by createCrudService. */
@@ -25,10 +49,13 @@ export interface CrudQueryKeys {
   detail: (id: number) => readonly [string, string, number];
 }
 
+/** List data: T[] when no parser or listFromResponse, or { list, ...meta } when parseListResponse. */
+export type ListData<T, M> = M extends undefined ? T[] : ListResponse<T, M>;
+
 /** Return type of createCrudService. */
-export interface CrudServiceResult<T extends CrudEntity> {
+export interface CrudServiceResult<T extends CrudEntity, ListMeta = undefined> {
   queryKeys: CrudQueryKeys;
-  useGetList: () => ReturnType<typeof useQuery<T[]>>;
+  useGetList: () => ReturnType<typeof useQuery<ListData<T, ListMeta>>>;
   useGetItem: (id: number) => ReturnType<typeof useQuery<T>>;
   useCreate: () => ReturnType<typeof useMutation<T, Error, Omit<T, "id">>>;
   useUpdate: () => ReturnType<typeof useMutation<T, Error, T>>;
@@ -39,22 +66,35 @@ export interface CrudServiceResult<T extends CrudEntity> {
  * Creates a generic CRUD service for TanStack Query.
  * Supports list, detail, create (optimistic), update, and delete (optimistic).
  *
- * @param config - Entity key and base API URL
+ * List responses:
+ * - No config: API returns T[] → hook returns T[].
+ * - listFromResponse: unwrap to T[] (e.g. body.results) → hook returns T[].
+ * - parseListResponse: return { list: T[], ...meta } → hook returns full object; mutations preserve meta.
+ *
+ * @param config - Entity key, base URL, and optional list parsers
  * @returns Query keys and hooks for the entity
  *
- * @example
- * ```ts
- * const postService = createCrudService<Post>({
- *   entityKey: "posts",
- *   baseUrl: "https://api.example.com/posts",
- * });
- * const { useGetList, useCreate } = postService;
- * ```
+ * @example List only (simple)
+ * createCrudService<Post>({ entityKey: "posts", baseUrl: "/api/posts" })
+ *
+ * @example List + metadata (any shape)
+ * createCrudService<Item, { info: Info; next?: string }>({
+ *   entityKey: "items", baseUrl: "/api/items",
+ *   parseListResponse: (body) => ({ list: body.data, info: body.info, next: body.links?.next }),
+ * })
  */
-export function createCrudService<T extends CrudEntity>(
-  config: CrudServiceConfig<T>
-): CrudServiceResult<T> {
-  const { entityKey, baseUrl, notFoundMessage = "Not found" } = config;
+export function createCrudService<T extends CrudEntity, ListMeta = undefined>(
+  config: CrudServiceConfig<T, ListMeta>
+): CrudServiceResult<T, ListMeta> {
+  const {
+    entityKey,
+    baseUrl,
+    notFoundMessage = "Not found",
+    listFromResponse,
+    parseListResponse,
+  } = config;
+
+  const hasListMeta = !!parseListResponse;
 
   const queryKeys: CrudQueryKeys = {
     all: [entityKey] as const,
@@ -63,15 +103,22 @@ export function createCrudService<T extends CrudEntity>(
     detail: (id: number) => [...queryKeys.details(), id] as const,
   };
 
-  const useGetList = () =>
+  const useGetList = (): ReturnType<
+    CrudServiceResult<T, ListMeta>["useGetList"]
+  > =>
     useQuery({
       queryKey: queryKeys.lists(),
-      queryFn: async (): Promise<T[]> => {
+      queryFn: async (): Promise<ListData<T, ListMeta>> => {
         const res = await fetch(baseUrl);
         if (!res.ok) throw new Error(`Failed to fetch ${entityKey}`);
-        return res.json();
+        const body = await res.json();
+        if (parseListResponse)
+          return parseListResponse(body) as ListData<T, ListMeta>;
+        if (listFromResponse)
+          return listFromResponse(body) as ListData<T, ListMeta>;
+        return body as T[] as ListData<T, ListMeta>;
       },
-    });
+    }) as ReturnType<CrudServiceResult<T, ListMeta>["useGetList"]>;
 
   const useGetItem = (id: number) =>
     useQuery({
@@ -97,11 +144,26 @@ export function createCrudService<T extends CrudEntity>(
       },
       onMutate: async (newItem) => {
         await queryClient.cancelQueries({ queryKey: queryKeys.lists() });
-        const previous = queryClient.getQueryData<T[]>(queryKeys.lists());
-        queryClient.setQueryData<T[]>(queryKeys.lists(), (old = []) => [
-          { ...newItem, id: Date.now() } as T,
-          ...old,
-        ]);
+        const previous = queryClient.getQueryData<
+          T[] | ListResponse<T, ListMeta>
+        >(queryKeys.lists());
+        queryClient.setQueryData<T[] | ListResponse<T, ListMeta>>(
+          queryKeys.lists(),
+          (old) => {
+            const isListResponse =
+              hasListMeta &&
+              old != null &&
+              typeof old === "object" &&
+              "list" in old;
+            const arr = isListResponse
+              ? (old as ListResponse<T, ListMeta>).list
+              : ((old ?? []) as T[]);
+            const nextList = [{ ...newItem, id: Date.now() } as T, ...arr];
+            return isListResponse
+              ? { ...(old as ListResponse<T, ListMeta>), list: nextList }
+              : nextList;
+          }
+        );
         return { previous };
       },
       onError: (_err, _newItem, context) => {
@@ -140,9 +202,25 @@ export function createCrudService<T extends CrudEntity>(
       },
       onMutate: async (id) => {
         await queryClient.cancelQueries({ queryKey: queryKeys.lists() });
-        const previous = queryClient.getQueryData<T[]>(queryKeys.lists());
-        queryClient.setQueryData<T[]>(queryKeys.lists(), (old = []) =>
-          old.filter((item) => item.id !== id)
+        const previous = queryClient.getQueryData<
+          T[] | ListResponse<T, ListMeta>
+        >(queryKeys.lists());
+        queryClient.setQueryData<T[] | ListResponse<T, ListMeta>>(
+          queryKeys.lists(),
+          (old) => {
+            const isListResponse =
+              hasListMeta &&
+              old != null &&
+              typeof old === "object" &&
+              "list" in old;
+            const arr = isListResponse
+              ? (old as ListResponse<T, ListMeta>).list
+              : ((old ?? []) as T[]);
+            const nextList = arr.filter((item) => item.id !== id);
+            return isListResponse
+              ? { ...(old as ListResponse<T, ListMeta>), list: nextList }
+              : nextList;
+          }
         );
         return { previous };
       },
@@ -165,52 +243,56 @@ export function createCrudService<T extends CrudEntity>(
   };
 }
 
-// --- EXAMPLE: Post service (JSONPlaceholder) ---
-/*
-export interface Post extends CrudEntity {
-  title: string;
-  body: string;
-  userId: number;
-}
-
-const postService = createCrudService<Post>({
-  entityKey: "posts",
-  baseUrl: "https://jsonplaceholder.typicode.com/posts",
-  notFoundMessage: "Post not found",
-});
-
-// Query key factory for Post-related queries.
-export const postKeys = postService.queryKeys;
-
-// Fetches all posts.
-export const useGetPosts = postService.useGetList;
-
-// Fetches a single post by ID.
-export const useGetPost = postService.useGetItem;
-
-// Creates a new post with optimistic update.
-export const useCreatePost = postService.useCreate;
-
-// Updates an existing post.
-export const useUpdatePost = postService.useUpdate;
-
-// Deletes a post with optimistic update.
-export const useDeletePost = postService.useDelete;
-*/
-
 /* --- USAGE EXAMPLES ---
-
-NEW SERVICE:   const userService = createCrudService<User>({
-                   entityKey: "users",
-                   baseUrl: "/api/users",
-                 });
-
-                 1. READ LIST:   const { data: posts, isLoading } = useGetPosts();
-  2. READ ITEM:   const { data: post } = useGetPost(1);
-  3. CREATE:      const { mutate: createPost } = useCreatePost();
-                  createPost({ title: "Hello", body: "World", userId: 1 });
-  4. UPDATE:      const { mutate: updatePost } = useUpdatePost();
-                  updatePost({ id: 1, title: "New Title", body: "...", userId: 1 });
-  5. DELETE:      const { mutate: deletePost } = useDeletePost();
-                  deletePost(1);
-*/
+ *
+ * List response options:
+ * - No list config: API returns T[] → hook returns T[].
+ * - listFromResponse: unwrap to T[] (e.g. body.results) → hook returns T[].
+ * - parseListResponse: return { list: T[], ...meta } → hook returns full object; mutations preserve meta.
+ *
+ * --- Example 1: API returns array directly (e.g. JSONPlaceholder) ---
+ *
+ * const postService = createCrudService<Post>({
+ *   entityKey: "posts",
+ *   baseUrl: "https://jsonplaceholder.typicode.com/posts",
+ *   notFoundMessage: "Post not found",
+ * });
+ * export const useGetPosts = postService.useGetList;  // data: Post[] | undefined
+ *
+ * --- Example 2: API wraps list (e.g. { results: T[] }) — return only the list ---
+ *
+ * const postService = createCrudService<Post>({
+ *   entityKey: "posts",
+ *   baseUrl: "https://api.example.com/posts",
+ *   listFromResponse: (body) => (body as { results: Post[] }).results,
+ * });
+ * export const useGetPosts = postService.useGetList;  // data: Post[] | undefined
+ *
+ * --- Example 3: API returns list + metadata (e.g. { results, info, next }) — access everything ---
+ *
+ * interface PostListMeta {
+ *   info: { count: number; pages: number; next: string | null };
+ *   nextPage?: string;
+ * }
+ * const postService = createCrudService<Post, PostListMeta>({
+ *   entityKey: "posts",
+ *   baseUrl: "https://api.example.com/posts",
+ *   parseListResponse: (body) => {
+ *     const { results, info, links } = body as { results: Post[]; info: PostListMeta["info"]; links?: { next: string } };
+ *     return { list: results, info, nextPage: links?.next };
+ *   },
+ * });
+ * export const useGetPosts = postService.useGetList;  // data: { list: Post[]; info: ...; nextPage?: string } | undefined
+ *
+ * --- Hook usage (same for all list shapes) ---
+ *
+ * 1. READ LIST:   const { data, isLoading } = useGetPosts();
+ *                 // data is T[] (examples 1–2) or { list, ...meta } (example 3); use data?.list ?? data for items
+ * 2. READ ITEM:   const { data: item } = useGetPost(1);
+ * 3. CREATE:      const { mutate: create } = useCreatePost();
+ *                 create({ title: "Hello", body: "World", userId: 1 });
+ * 4. UPDATE:      const { mutate: update } = useUpdatePost();
+ *                 update({ id: 1, title: "New Title", body: "...", userId: 1 });
+ * 5. DELETE:      const { mutate: deleteItem } = useDeletePost();
+ *                 deleteItem(1);
+ */

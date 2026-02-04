@@ -71,7 +71,7 @@ nextjs-boilerplate/
 │   ├── components/    # React components (Button, Card)
 │   ├── hooks/         # Custom hooks (useIsMounted for hydration)
 │   ├── providers/     # React providers (TanStackProvider)
-│   ├── services/      # API services (CRUD example with optimistic updates)
+│   ├── services/      # API services (CRUDService.ts: generic CRUD with optimistic updates)
 │   ├── store/         # Zustand stores (with localStorage persistence)
 │   ├── utils/         # Utility functions (formatDate, capitalize, debounce)
 │   └── styles/        # Global styles and theme variables
