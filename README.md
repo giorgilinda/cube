@@ -83,6 +83,12 @@ Run tests in watch mode:
 npm run test:watch
 ```
 
+Run lint and tests together (e.g. before commit or in CI):
+
+```bash
+npm run check
+```
+
 ### Building for Production
 
 ```bash
@@ -227,8 +233,11 @@ These serve as examples of best practices for component structure and CSS Module
 
 Tests are located in the `tests/` directory. Example tests are included for:
 
-- Utility functions (`tests/utils.test.ts`)
-- Components (`tests/components/Button.test.tsx`)
+- Utility functions (`tests/utils.test.ts`) – formatDate, capitalize, debounce
+- Components (`tests/components/Button.test.tsx`, `tests/components/Card.test.tsx`)
+- CRUD service (`tests/services/CRUDService.test.ts`) – query keys, URL building, listFromResponse
+
+CI runs on push/PR to `main` or `master` (`.github/workflows/ci.yml`): install, lint, test, build.
 
 ### Writing Tests
 

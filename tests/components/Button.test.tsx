@@ -31,4 +31,25 @@ describe("Button", () => {
     render(<Button disabled>Disabled</Button>);
     expect(screen.getByText("Disabled")).toBeDisabled();
   });
+
+  it("defaults to type button when not specified", () => {
+    render(<Button>Submit</Button>);
+    expect(screen.getByText("Submit")).toHaveAttribute("type", "button");
+  });
+
+  it("renders with type submit when specified", () => {
+    render(<Button type="submit">Submit</Button>);
+    expect(screen.getByText("Submit")).toHaveAttribute("type", "submit");
+  });
+
+  it("does not call onClick when disabled", () => {
+    const handleClick = jest.fn();
+    render(
+      <Button disabled onClick={handleClick}>
+        Disabled
+      </Button>
+    );
+    screen.getByText("Disabled").click();
+    expect(handleClick).not.toHaveBeenCalled();
+  });
 });
