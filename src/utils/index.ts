@@ -5,7 +5,7 @@
  */
 
 /**
-cd  * Format a date to a readable string (e.g. "January 1, 2025").
+ * Format a date to a readable string (e.g. "January 1, 2025").
  *
  * @param date - Date to format
  * @returns Formatted string in en-US long date style

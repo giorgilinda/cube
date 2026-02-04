@@ -1,4 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  type QueryKey,
+} from "@tanstack/react-query";
 
 // --- GENERIC CRUD SERVICE ---
 
@@ -42,9 +47,9 @@ export interface CrudServiceConfig<T extends CrudEntity, ListMeta = undefined> {
 }
 
 /** Query key factory returned by createCrudService. */
-export interface CrudQueryKeys {
+export interface CrudQueryKeys<ListParams = void> {
   all: readonly [string];
-  lists: () => readonly [string, string];
+  lists: (params?: ListParams) => readonly unknown[];
   details: () => readonly [string, string];
   detail: (id: number) => readonly [string, string, number];
 }
@@ -53,9 +58,15 @@ export interface CrudQueryKeys {
 export type ListData<T, M> = M extends undefined ? T[] : ListResponse<T, M>;
 
 /** Return type of createCrudService. */
-export interface CrudServiceResult<T extends CrudEntity, ListMeta = undefined> {
-  queryKeys: CrudQueryKeys;
-  useGetList: () => ReturnType<typeof useQuery<ListData<T, ListMeta>>>;
+export interface CrudServiceResult<
+  T extends CrudEntity,
+  ListMeta = undefined,
+  ListParams = void,
+> {
+  queryKeys: CrudQueryKeys<ListParams>;
+  useGetList: (
+    params?: ListParams
+  ) => ReturnType<typeof useQuery<ListData<T, ListMeta>>>;
   useGetItem: (id: number) => ReturnType<typeof useQuery<T>>;
   useCreate: () => ReturnType<typeof useMutation<T, Error, Omit<T, "id">>>;
   useUpdate: () => ReturnType<typeof useMutation<T, Error, T>>;
@@ -71,6 +82,9 @@ export interface CrudServiceResult<T extends CrudEntity, ListMeta = undefined> {
  * - listFromResponse: unwrap to T[] (e.g. body.results) → hook returns T[].
  * - parseListResponse: return { list: T[], ...meta } → hook returns full object; mutations preserve meta.
  *
+ * List params (optional): Use the third generic ListParams to type query params for the list endpoint.
+ * Pass an object to useGetList(params); it is serialized as URL search params (e.g. ?status=alive&species=Human).
+ *
  * @param config - Entity key, base URL, and optional list parsers
  * @returns Query keys and hooks for the entity
  *
@@ -82,10 +96,18 @@ export interface CrudServiceResult<T extends CrudEntity, ListMeta = undefined> {
  *   entityKey: "items", baseUrl: "/api/items",
  *   parseListResponse: (body) => ({ list: body.data, info: body.info, next: body.links?.next }),
  * })
+ *
+ * @example Server-side list params (third generic)
+ * createCrudService<Character, CharListMeta, { status?: string; species?: string }>({ ... })
+ * useGetList({ status: "alive", species: "Human" })  // GET /api/character?status=alive&species=Human
  */
-export function createCrudService<T extends CrudEntity, ListMeta = undefined>(
+export function createCrudService<
+  T extends CrudEntity,
+  ListMeta = undefined,
+  ListParams = void,
+>(
   config: CrudServiceConfig<T, ListMeta>
-): CrudServiceResult<T, ListMeta> {
+): CrudServiceResult<T, ListMeta, ListParams> {
   const {
     entityKey,
     baseUrl,
@@ -96,29 +118,40 @@ export function createCrudService<T extends CrudEntity, ListMeta = undefined>(
 
   const hasListMeta = !!parseListResponse;
 
-  const queryKeys: CrudQueryKeys = {
+  const queryKeys: CrudQueryKeys<ListParams> = {
     all: [entityKey] as const,
-    lists: () => [...queryKeys.all, "list"] as const,
+    lists: (params?: ListParams) =>
+      (params != null
+        ? ([...queryKeys.all, "list", params] as const)
+        : ([...queryKeys.all, "list"] as const)) as readonly unknown[],
     details: () => [...queryKeys.all, "detail"] as const,
     detail: (id: number) => [...queryKeys.details(), id] as const,
   };
 
-  const useGetList = (): ReturnType<
-    CrudServiceResult<T, ListMeta>["useGetList"]
-  > =>
+  function buildListUrl(params?: ListParams): string {
+    if (params == null || typeof params !== "object") return baseUrl;
+    const url = new URL(baseUrl);
+    Object.entries(params as Record<string, unknown>).forEach(
+      ([k, v]) => v != null && v !== "" && url.searchParams.set(k, String(v))
+    );
+    return url.toString();
+  }
+
+  const useGetList = (
+    params?: ListParams
+  ): ReturnType<CrudServiceResult<T, ListMeta, ListParams>["useGetList"]> =>
     useQuery({
-      queryKey: queryKeys.lists(),
+      queryKey: queryKeys.lists(params),
       queryFn: async (): Promise<ListData<T, ListMeta>> => {
-        const res = await fetch(baseUrl);
+        const url = buildListUrl(params);
+        const res = await fetch(url);
         if (!res.ok) throw new Error(`Failed to fetch ${entityKey}`);
         const body = await res.json();
-        if (parseListResponse)
-          return parseListResponse(body) as ListData<T, ListMeta>;
-        if (listFromResponse)
-          return listFromResponse(body) as ListData<T, ListMeta>;
+        if (parseListResponse) return parseListResponse(body) as ListData<T, ListMeta>;
+        if (listFromResponse) return listFromResponse(body) as ListData<T, ListMeta>;
         return body as T[] as ListData<T, ListMeta>;
       },
-    }) as ReturnType<CrudServiceResult<T, ListMeta>["useGetList"]>;
+    }) as ReturnType<CrudServiceResult<T, ListMeta, ListParams>["useGetList"]>;
 
   const useGetItem = (id: number) =>
     useQuery({
@@ -144,21 +177,19 @@ export function createCrudService<T extends CrudEntity, ListMeta = undefined>(
       },
       onMutate: async (newItem) => {
         await queryClient.cancelQueries({ queryKey: queryKeys.lists() });
-        const previous = queryClient.getQueryData<
+        const previous = queryClient.getQueriesData<
           T[] | ListResponse<T, ListMeta>
-        >(queryKeys.lists());
-        queryClient.setQueryData<T[] | ListResponse<T, ListMeta>>(
-          queryKeys.lists(),
+        >({ queryKey: queryKeys.lists() });
+        queryClient.setQueriesData<T[] | ListResponse<T, ListMeta>>(
+          { queryKey: queryKeys.lists() },
           (old) => {
             const isListResponse =
-              hasListMeta &&
-              old != null &&
-              typeof old === "object" &&
-              "list" in old;
-            const arr = isListResponse
-              ? (old as ListResponse<T, ListMeta>).list
-              : ((old ?? []) as T[]);
-            const nextList = [{ ...newItem, id: Date.now() } as T, ...arr];
+              hasListMeta && old != null && typeof old === "object" && "list" in old;
+            const arr = isListResponse ? (old as ListResponse<T, ListMeta>).list : (old ?? []) as T[];
+            const nextList = [
+              { ...newItem, id: Date.now() } as T,
+              ...arr,
+            ];
             return isListResponse
               ? { ...(old as ListResponse<T, ListMeta>), list: nextList }
               : nextList;
@@ -167,7 +198,9 @@ export function createCrudService<T extends CrudEntity, ListMeta = undefined>(
         return { previous };
       },
       onError: (_err, _newItem, context) => {
-        queryClient.setQueryData(queryKeys.lists(), context?.previous);
+        (context?.previous as Array<[QueryKey, unknown]> | undefined)?.forEach(
+          ([key, data]) => queryClient.setQueryData(key, data)
+        );
       },
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: queryKeys.lists() });
@@ -202,20 +235,15 @@ export function createCrudService<T extends CrudEntity, ListMeta = undefined>(
       },
       onMutate: async (id) => {
         await queryClient.cancelQueries({ queryKey: queryKeys.lists() });
-        const previous = queryClient.getQueryData<
+        const previous = queryClient.getQueriesData<
           T[] | ListResponse<T, ListMeta>
-        >(queryKeys.lists());
-        queryClient.setQueryData<T[] | ListResponse<T, ListMeta>>(
-          queryKeys.lists(),
+        >({ queryKey: queryKeys.lists() });
+        queryClient.setQueriesData<T[] | ListResponse<T, ListMeta>>(
+          { queryKey: queryKeys.lists() },
           (old) => {
             const isListResponse =
-              hasListMeta &&
-              old != null &&
-              typeof old === "object" &&
-              "list" in old;
-            const arr = isListResponse
-              ? (old as ListResponse<T, ListMeta>).list
-              : ((old ?? []) as T[]);
+              hasListMeta && old != null && typeof old === "object" && "list" in old;
+            const arr = isListResponse ? (old as ListResponse<T, ListMeta>).list : (old ?? []) as T[];
             const nextList = arr.filter((item) => item.id !== id);
             return isListResponse
               ? { ...(old as ListResponse<T, ListMeta>), list: nextList }
@@ -225,7 +253,9 @@ export function createCrudService<T extends CrudEntity, ListMeta = undefined>(
         return { previous };
       },
       onError: (_err, _id, context) => {
-        queryClient.setQueryData(queryKeys.lists(), context?.previous);
+        (context?.previous as Array<[QueryKey, unknown]> | undefined)?.forEach(
+          ([key, data]) => queryClient.setQueryData(key, data)
+        );
       },
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: queryKeys.lists() });
@@ -284,9 +314,17 @@ export function createCrudService<T extends CrudEntity, ListMeta = undefined>(
  * });
  * export const useGetPosts = postService.useGetList;  // data: { list: Post[]; info: ...; nextPage?: string } | undefined
  *
+ * --- Example 4: Server-side filtering (optional third generic ListParams) ---
+ *
+ * interface CharacterListParams { name?: string; status?: "alive" | "dead" | "unknown"; species?: string; }
+ * const charService = createCrudService<Character, CharListMeta, CharacterListParams>({ ... });
+ * const { data } = useGetCharacters({ status: "alive", species: "Human" });
+ * // Fetches: /api/character?status=alive&species=Human
+ *
  * --- Hook usage (same for all list shapes) ---
  *
  * 1. READ LIST:   const { data, isLoading } = useGetPosts();
+ *                 // With server-side filters: useGetPosts({ status: "alive", species: "Human" })
  *                 // data is T[] (examples 1–2) or { list, ...meta } (example 3); use data?.list ?? data for items
  * 2. READ ITEM:   const { data: item } = useGetPost(1);
  * 3. CREATE:      const { mutate: create } = useCreatePost();

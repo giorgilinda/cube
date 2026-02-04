@@ -99,6 +99,8 @@ const userService = createCrudService<User>({
 
 export const { useGetList, useGetItem, useCreate, useUpdate, useDelete } = userService;
 // Or alias: export const useGetUsers = userService.useGetList;
+// For server-side filtering, use third generic: createCrudService<User, undefined, { role: string }>(...)
+// then useGetList({ role: "admin" }) to fetch /api/users?role=admin
 ```
 
 ### Add Client State (Zustand with Persistence)

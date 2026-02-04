@@ -143,7 +143,7 @@ TanStack Query handles all server state - data fetching, caching, and synchroniz
 - Query caching with 1-minute stale time
 - React Query Devtools (in development)
 
-The CRUD service (`src/services/CRUDService.ts`) exports a **generic `createCrudService<T>()` factory**. Create services for any entity by calling the factory. List responses can be plain arrays, unwrapped via `listFromResponse`, or list-plus-metadata via `parseListResponse` (see JSDoc in CRUDService.ts).
+The CRUD service (`src/services/CRUDService.ts`) exports a **generic `createCrudService<T>()` factory**. Create services for any entity by calling the factory. List responses can be plain arrays, unwrapped via `listFromResponse`, or list-plus-metadata via `parseListResponse` (see JSDoc in CRUDService.ts). Optional third generic `ListParams` types query params for the list endpoint; pass an object to `useGetList(params)` for server-side filtering (e.g. `useGetList({ status: "alive" })`).
 
 ```typescript
 import { createCrudService, type CrudEntity } from "@/services/CRUDService";
@@ -160,7 +160,7 @@ const userService = createCrudService<User>({
 
 // Use the generated hooks
 const { useGetList, useGetItem, useCreate, useUpdate, useDelete } = userService;
-const { data: users } = useGetList();
+const { data: users } = useGetList();  // optional: useGetList({ role: "admin" }) when using ListParams
 const { mutate: createUser } = useCreate();
 createUser({ name: "Jane", email: "jane@example.com" });  // id omitted
 ```
