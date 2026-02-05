@@ -4,8 +4,8 @@ Project-level conventions reflected in the codebase. When in doubt, follow exist
 
 ## Components
 
-- **Definition**: Use arrow function components with `React.FC<Props>` (see `Button.tsx`, `Card.tsx`).
-- **Naming**: PascalCase for component files (e.g. `BaseTemplate.tsx`, `Button.tsx`).
+- **Definition**: Use arrow function components with `React.FC<Props>` (see `Main.tsx`, `Box.tsx`).
+- **Naming**: PascalCase for component files (e.g. `BaseTemplate.tsx`, `Main.tsx`, `Box.tsx`).
 - **Documentation**: TSDoc/JSDoc on exported components; document props via TypeScript interfaces and optional `@example` blocks.
 
 ## Hooks

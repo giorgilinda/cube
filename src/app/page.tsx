@@ -3,7 +3,7 @@ import styles from "./page.module.css";
 import Main from "@/components/Main";
 
 /**
- * Home page. Renders the default Next.js welcome content with documentation links.
+ * Home page.
  */
 export default function Home() {
   return (
