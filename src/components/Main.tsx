@@ -6,13 +6,13 @@ import Box from "./Box";
 
 interface MainProps {}
 
-const Main: FC<MainProps> = () => {
-  const BOX_DATA = [
-    [1, 1, 1],
-    [1, 0, 0],
-    [1, 1, 1],
-  ];
+const BOX_DATA = [
+  [1, 1, 1],
+  [1, 0, 0],
+  [1, 1, 1],
+];
 
+const Main: FC<MainProps> = () => {
   const [order, setOrder] = useState<number[][]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -26,13 +26,18 @@ const Main: FC<MainProps> = () => {
     if (flatOrder.length < flatData.length) return;
 
     intervalRef.current = setInterval(() => {
-      if (order.length === 0 && intervalRef && intervalRef.current) {
-        clearInterval(intervalRef.current);
-        return;
-      }
-
-      order.pop();
-      setOrder([...order]);
+      console.log("🪳", "interval");
+      setOrder((prev) => {
+        if (prev.length <= 1) {
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            console.log("🪳", "STOPPED");
+            intervalRef.current = null;
+          }
+          return [];
+        }
+        return prev.slice(0, -1);
+      });
     }, 1000);
   }, [order]);
 
@@ -40,7 +45,7 @@ const Main: FC<MainProps> = () => {
     <div className={styles.grid}>
       {BOX_DATA.map((row, rowIdx) => {
         return row.map((col, colIdx) => {
-          const idx = JSON.stringify(`${rowIdx}-${colIdx}`);
+          const idx = `${rowIdx}-${colIdx}`;
           const isGreen =
             order.filter((box) => {
               return box[0] === rowIdx && box[1] === colIdx;
